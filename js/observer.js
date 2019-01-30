@@ -4,30 +4,33 @@ function Observer(data) {
 }
 
 Observer.prototype = {
-    walk: function(data) {
+    walk: function (data) {
         var me = this;
-        Object.keys(data).forEach(function(key) {
+        Object.keys(data).forEach(function (key) {
             me.convert(key, data[key]);
         });
     },
-    convert: function(key, val) {
+    convert: function (key, val) {
+        console.log('-----------');
         this.defineReactive(this.data, key, val);
     },
 
-    defineReactive: function(data, key, val) {
+    defineReactive: function (data, key, val) {
         var dep = new Dep();
         var childObj = observe(val);
 
         Object.defineProperty(data, key, {
             enumerable: true, // 可枚举
             configurable: false, // 不能再define
-            get: function() {
+            get: function () {
+                console.log(Dep.target);
                 if (Dep.target) {
+                    console.log('defineReactive get');
                     dep.depend();
                 }
                 return val;
             },
-            set: function(newVal) {
+            set: function (newVal) {
                 if (newVal === val) {
                     return;
                 }
@@ -58,23 +61,26 @@ function Dep() {
 }
 
 Dep.prototype = {
-    addSub: function(sub) {
+    addSub: function (sub) {
+        console.log('addSub');
         this.subs.push(sub);
     },
 
-    depend: function() {
+    depend: function () {
+        console.log('Dep depend');
         Dep.target.addDep(this);
     },
 
-    removeSub: function(sub) {
+    removeSub: function (sub) {
         var index = this.subs.indexOf(sub);
         if (index != -1) {
             this.subs.splice(index, 1);
         }
     },
 
-    notify: function() {
-        this.subs.forEach(function(sub) {
+    notify: function () {
+        console.log(this.subs.length);
+        this.subs.forEach(function (sub) {
             sub.update();
         });
     }

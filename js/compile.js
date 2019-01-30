@@ -53,6 +53,7 @@ Compile.prototype = {
 
         [].slice.call(nodeAttrs).forEach(function (attr) {
             var attrName = attr.name;
+
             if (me.isDirective(attrName)) {
                 var exp = attr.value;
                 var dir = attrName.substring(2);

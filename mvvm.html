@@ -4,56 +4,41 @@
 <head>
     <meta charset="UTF-8">
     <title>MVVM</title>
+    <style>
+        #app{
+            padding-top: 100px;
+        }
+    </style>
 </head>
 
 <body>
 
-    <div id="mvvm-app">
-        <input type="text" v-model="someStr">
-        <input type="text" v-model="child.someStr">
-        <!-- <p v-class="className" class="abc">
-        {{someStr}}
-        <span v-text="child.someStr"></span>
-    </p> -->
-        <p>{{getHelloWord}}</p>
-        <p v-html="htmlStr"></p>
-        <button v-on:click="clickBtn">change model</button>
+    <div id="app">
+        <input type="text" v-model="num">
+        {{num}}
+        <button onclick="change(4)">num=3</button>
+        <button onclick="change(3)">num=4</button>
     </div>
 
-    <script src="http://cdn.bootcss.com/vue/1.0.25/vue.js"></script>
+    <!-- <script src="http://cdn.bootcss.com/vue/1.0.25/vue.js"></script> -->
     <script src="./js/observer.js"></script>
     <script src="./js/watcher.js"></script>
     <script src="./js/compile.js"></script>
     <script src="./js/mvvm.js"></script>
     <script>
-        var vm = new MVVM({
-            el: '#mvvm-app',
+        let mvvm = new MVVM({
+            el: "#app",
             data: {
-                someStr: 'hello ',
-                className: 'btn',
-                htmlStr: '<span style="color: #f00;">red</span>',
-                child: {
-                    someStr: 'World !'
-                }
-            },
-
-            computed: {
-                getHelloWord: function () {
-                    return this.someStr + this.child.someStr;
-                }
-            },
-
-            methods: {
-                clickBtn: function (e) {
-                    var randomStrArr = ['childOne', 'childTwo', 'childThree'];
-                    this.child.someStr = randomStrArr[parseInt(Math.random() * 3)];
-                }
+                num: 12
             }
-        });
+        })
+        mvvm.$watch('num', function () {
+            console.log('cbcbcb');
+        })
 
-        vm.$watch('child.someStr', function () {
-            console.log(arguments);
-        });
+        function change(num) {
+            mvvm.num = num;
+        }
     </script>
 
 </body>

@@ -3,13 +3,18 @@
 class Observer {
 	constructor(data) {
 		this.data = data;
+		this.walk(data);
 	}
-	walk() {
-		Object.keys(this.data).forEach(key => {
-			this.defineReactive(this.data, key, this.data[key]);
+
+	walk(data) {
+		Object.keys(data).forEach(key => {
+			this.convert(key, data[key]);
 		});
 	}
 
+	convert(key, val) {
+		this.defineReactive(this.data, key, val);
+	}
 	defineReactive(data, key, val) {
 		var dep = new Dep();
 		var childObj = observe(val);
@@ -18,6 +23,7 @@ class Observer {
 			enumerable: true,
 			configurable: false,
 			get() {
+				console.log(Dep.target);
 				if (Dep.target) {
 					dep.depend();
 				}
@@ -42,32 +48,34 @@ function observe(value) {
 	if (!value || typeof value != "object") {
 		return;
 	}
-	return new Object(value);
+	return new Observer(value);
 }
 
 let uid = 0;
 class Dep {
-	// static target;
 	constructor() {
 		this.id = uid++;
 		this.subs = [];
 	}
 
 	addSub(sub) {
+		console.log('addSub');
 		this.subs.push(sub);
 	}
 	depend() {
-		console.log(Dep);
+
 		Dep.target.addDep(this);
 	}
+
 	removeSub(sub) {
 		let index = this.subs.indexOf(sub);
 		if (index != -1) {
 			this.subs.splice(index, 1);
 		}
 	}
+
 	notify() {
-		console.log("notify");
+		console.log(this.subs.length);
 		this.subs.forEach(sub => {
 			sub.update();
 		});
@@ -78,38 +86,39 @@ Dep.target = null;
 // 解析指令：Compile
 class Compile {
 	constructor(el, vm) {
+		this.$vm = vm; //vm是MVVM实例
 		this.$el = this.isElementNode(el) ? el : document.querySelector(el);
-		this.$vm = vm;
+
 		if (this.$el) {
 			this.$fragment = this.node2Fragment(this.$el);
 			this.init();
-			this.$el.appendChild(this.$fragment);
+			this.$el.appendChild(this.$fragment); //这一步很奇怪，没看到这个函数改变任何东西？fragment还是那个fragment
 		}
 	}
 
-	init() {
-		this.compileElement(this.$fragment);
-	}
 	node2Fragment(el) {
-		let fragment = document.createDocumentFragment;
+		let fragment = document.createDocumentFragment();
 		let child;
 		while ((child = el.firstChild)) {
 			fragment.appendChild(child);
 		}
 		return fragment;
 	}
+	init() {
+		this.compileElement(this.$fragment);
+	}
 	compileElement(el) {
-		let chileNodes = el.chileNodes;
-		[].slice.call(chileNodes).forEach(node => {
+		let childNodes = el.childNodes;
+
+		[].slice.call(childNodes).forEach(node => {
 			let text = node.textContent;
 			let reg = /\{\{(.*)\}\}/;
-
 			if (this.isElementNode(node)) {
-				this.compileElement(node);
+				this.compile(node)
 			} else if (this.isTextNode(node) && reg.test(text)) {
 				this.compileText(node, RegExp.$1);
 			}
-			if (node.chileNodes && node.chileNodes.length) {
+			if (node.childNodes && node.childNodes.length) {
 				this.compileElement(node);
 			}
 		});
@@ -170,7 +179,8 @@ let compileUtil = {
 		this.bind(node, vm, exp, "model");
 
 		let val = this._getVMVal(vm, exp);
-		node.addEventListner("input", e => {
+
+		node.addEventListener("input", e => {
 			let newValue = e.target.value;
 			if (val === newValue) {
 				return;
@@ -264,7 +274,6 @@ class Watcher {
 		} else {
 			this.getter = this.parseGetter(expOrFn);
 		}
-
 		this.value = this.get();
 	}
 
@@ -283,6 +292,7 @@ class Watcher {
 
 	addDep(dep) {
 		if (!this.depIds.hasOwnProperty(dep.id)) {
+			console.log('wathcer addDep');
 			dep.addSub(this);
 			this.depIds[dep.id] = dep;
 		}
@@ -296,7 +306,7 @@ class Watcher {
 	}
 
 	parseGetter(exp) {
-		if (/[^\w.$]/.text(exp)) {
+		if (/[^\w.$]/.test(exp)) {
 			return;
 		}
 
@@ -319,44 +329,47 @@ class MVVM {
 		this.$options = options;
 		this._data = this.$options.data;
 		let data = this._data;
-
+		console.log(data);
 		Object.keys(data).forEach(key => {
 			this._proxyData(key);
 		});
 
 		this._initComputed();
+		console.log(data);
 		observe(data, this);
 		this.$compile = new Compile(options.el, this);
 	}
 
 	$watch(key, cb, options) {
-		new Watcher(this, key, cb)
+		new Watcher(this, key, cb);
 	}
 
 	_proxyData(key, setter, getter) {
 		let _this = this;
-		setter = setter || Object.defineProperty(this, key, {
-			configurable: false,
-			enumerable: true,
-			get: function proxyGetter() {
-				return _this._data[key]
-			},
-			set: function proxySetter(newVal) {
-				_this._data[key] = newVal;
-			}
-		})
+		setter =
+			setter ||
+			Object.defineProperty(this, key, {
+				configurable: false,
+				enumerable: true,
+				get: function proxyGetter() {
+					return _this._data[key];
+				},
+				set: function proxySetter(newVal) {
+					_this._data[key] = newVal;
+				}
+			});
 	}
 
 	_initComputed() {
 		let computed = this.$options.computed;
-		if (typeof computed === 'object') {
+		if (typeof computed === "object") {
 			Object.keys(computed).forEach(key => {
 				Object.defineProperty(_this, key, {
-					get: typeof computed[key] === 'function' ?
+					get: typeof computed[key] === "function" ?
 						computed[key] : computed[key].get,
-					set() {},
-				})
-			})
+					set() {}
+				});
+			});
 		}
 	}
 }

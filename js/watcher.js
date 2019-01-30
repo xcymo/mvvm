@@ -14,10 +14,11 @@ function Watcher(vm, expOrFn, cb) {
 }
 
 Watcher.prototype = {
-    update: function() {
+    update: function () {
+        console.log('watcher update');
         this.run();
     },
-    run: function() {
+    run: function () {
         var value = this.get();
         var oldVal = this.value;
         if (value !== oldVal) {
@@ -25,7 +26,7 @@ Watcher.prototype = {
             this.cb.call(this.vm, value, oldVal);
         }
     },
-    addDep: function(dep) {
+    addDep: function (dep) {
         // 1. 每次调用run()的时候会触发相应属性的getter
         // getter里面会触发dep.depend()，继而触发这里的addDep
         // 2. 假如相应属性的dep.id已经在当前watcher的depIds里，说明不是一个新的属性，仅仅是改变了其值而已
@@ -41,23 +42,24 @@ Watcher.prototype = {
         // 触发了addDep(), 在整个forEach过程，当前wacher都会加入到每个父级过程属性的dep
         // 例如：当前watcher的是'child.child.name', 那么child, child.child, child.child.name这三个属性的dep都会加入当前watcher
         if (!this.depIds.hasOwnProperty(dep.id)) {
+            console.log('watcher addDep');
             dep.addSub(this);
             this.depIds[dep.id] = dep;
         }
     },
-    get: function() {
+    get: function () {
         Dep.target = this;
         var value = this.getter.call(this.vm, this.vm);
         Dep.target = null;
         return value;
     },
 
-    parseGetter: function(exp) {
-        if (/[^\w.$]/.test(exp)) return; 
+    parseGetter: function (exp) {
+        if (/[^\w.$]/.test(exp)) return;
 
         var exps = exp.split('.');
 
-        return function(obj) {
+        return function (obj) {
             for (var i = 0, len = exps.length; i < len; i++) {
                 if (!obj) return;
                 obj = obj[exps[i]];
