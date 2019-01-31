@@ -23,6 +23,7 @@ Observer.prototype = {
             enumerable: true, // 可枚举
             configurable: false, // 不能再define
             get: function () {
+                console.log(2626);
                 console.log(Dep.target);
                 if (Dep.target) {
                     console.log('defineReactive get');

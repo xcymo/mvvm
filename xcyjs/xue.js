@@ -23,6 +23,7 @@ class Observer {
 			enumerable: true,
 			configurable: false,
 			get() {
+				console.log('2626');
 				console.log(Dep.target);
 				if (Dep.target) {
 					dep.depend();
@@ -284,7 +285,7 @@ class Watcher {
 	run() {
 		let value = this.get();
 		let oldVal = this.value;
-		if (val !== oldVal) {
+		if (value !== oldVal) {
 			this.value = value;
 			this.cb.call(this.vm, value, oldVal);
 		}
@@ -317,7 +318,7 @@ class Watcher {
 				if (!obj) {
 					return;
 				}
-				obj = item;
+				obj = obj[item];
 			}
 			return obj;
 		};
