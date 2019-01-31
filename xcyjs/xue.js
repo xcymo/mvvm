@@ -23,8 +23,6 @@ class Observer {
 			enumerable: true,
 			configurable: false,
 			get() {
-				console.log('2626');
-				console.log(Dep.target);
 				if (Dep.target) {
 					dep.depend();
 				}
@@ -64,7 +62,6 @@ class Dep {
 		this.subs.push(sub);
 	}
 	depend() {
-
 		Dep.target.addDep(this);
 	}
 
@@ -76,13 +73,13 @@ class Dep {
 	}
 
 	notify() {
-		console.log(this.subs.length);
 		this.subs.forEach(sub => {
 			sub.update();
 		});
 	}
 }
 Dep.target = null;
+
 
 // 解析指令：Compile
 class Compile {
@@ -127,10 +124,9 @@ class Compile {
 
 	compile(node) {
 		let nodeAttrs = node.attributes;
-
 		[].slice.call(nodeAttrs).forEach(attr => {
 			let attrName = attr.name;
-
+			console.log(attr);
 			if (this.isDirective(attrName)) {
 				let exp = attr.value;
 				let dir = attrName.substring(2);
@@ -144,13 +140,14 @@ class Compile {
 				node.removeAttribute(attrName); //没懂，为啥要移除属性
 			}
 		});
+
 	}
 
 	compileText(node, exp) {
 		compileUtil.text(node, this.$vm, exp);
 	}
 
-	isDirective(attr) {
+	isDirective(attr) { //判断是不是MVVM指令
 		return attr.indexOf("v-") == 0;
 	}
 
@@ -293,7 +290,6 @@ class Watcher {
 
 	addDep(dep) {
 		if (!this.depIds.hasOwnProperty(dep.id)) {
-			console.log('wathcer addDep');
 			dep.addSub(this);
 			this.depIds[dep.id] = dep;
 		}
@@ -330,13 +326,11 @@ class MVVM {
 		this.$options = options;
 		this._data = this.$options.data;
 		let data = this._data;
-		console.log(data);
 		Object.keys(data).forEach(key => {
 			this._proxyData(key);
 		});
 
 		this._initComputed();
-		console.log(data);
 		observe(data, this);
 		this.$compile = new Compile(options.el, this);
 	}
