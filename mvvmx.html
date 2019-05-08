@@ -10,6 +10,9 @@
         #app{
                 padding-top: 100px;
             }
+            input{
+                border :1px solid #ccc;
+            }
         </style>
 </head>
 
@@ -28,9 +31,6 @@
         data: {
             num: 12
         }
-    })
-    mvvm.$watch('num', function () {
-        console.log('cbcbcb');
     })
 
     function change(num) {

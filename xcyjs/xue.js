@@ -12,6 +12,7 @@ class Observer {
 		});
 	}
 
+
 	convert(key, val) {
 		this.defineReactive(this.data, key, val);
 	}
@@ -58,8 +59,8 @@ class Dep {
 	}
 
 	addSub(sub) {
-		console.log('addSub');
 		this.subs.push(sub);
+		console.log(this.subs);
 	}
 	depend() {
 		Dep.target.addDep(this);
@@ -261,19 +262,19 @@ let updater = {
 // 实现watcher
 
 class Watcher {
-	constructor(vm, expOrFn, cb) {
+	constructor(vm, expOrFn, cb) { //vm,key,callback
 		this.cb = cb;
 		this.vm = vm;
 		this.expOrFn = expOrFn;
 		this.depIds = {};
-
+		console.log(typeof expOrFn);
 		if (typeof expOrFn == "function") {
 			this.getter = expOrFn;
 		} else {
 			this.getter = this.parseGetter(expOrFn);
 		}
 		this.value = this.get();
-	}
+	}   
 
 	update() {
 		this.run();
@@ -286,18 +287,19 @@ class Watcher {
 			this.value = value;
 			this.cb.call(this.vm, value, oldVal);
 		}
-	}
-
+	}       
 	addDep(dep) {
+		console.log(dep);
 		if (!this.depIds.hasOwnProperty(dep.id)) {
 			dep.addSub(this);
+			console.log(dep);
 			this.depIds[dep.id] = dep;
 		}
 	}
 
 	get() {
 		Dep.target = this;
-		let value = this.getter.call(this.vm, this.vm);
+		let value = this.getter.call(this.vm, this.vm); // 这一步发生了很多，打断点看
 		Dep.target = null;
 		return value;
 	}
@@ -306,15 +308,17 @@ class Watcher {
 		if (/[^\w.$]/.test(exp)) {
 			return;
 		}
-
+		console.log(exp);
 		let exps = exp.split(".");
 
 		return function (obj) {
+			console.log(obj);
 			for (let item of exps) {
 				if (!obj) {
 					return;
 				}
 				obj = obj[item];
+				console.log(obj);
 			}
 			return obj;
 		};
@@ -327,7 +331,8 @@ class MVVM {
 		this._data = this.$options.data;
 		let data = this._data;
 		Object.keys(data).forEach(key => {
-			this._proxyData(key);
+            this._proxyData(key); //传说中的数据代理
+            this.$watch(key);
 		});
 
 		this._initComputed();
