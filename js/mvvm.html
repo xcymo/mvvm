@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>MVVM</title>
+  <style>
+    #app {
+      padding-top: 100px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="app">
+    <input type="text" v-model="num">
+    {{num}}
+    <button onclick="change(4)">num=3</button>
+    <button onclick="change(3)">num=4</button>
+  </div>
+
+  <!-- <script src="http://cdn.bootcss.com/vue/1.0.25/vue.js"></script> -->
+  <script src="./observer.js"></script>
+  <script src="./watcher.js"></script>
+  <script src="./compile.js"></script>
+  <script src="./mvvm.js"></script>
+  <script>
+    let mvvm = new MVVM({
+      el: "#app",
+      data: {
+        num: 12
+      }
+    })
+    mvvm.$watch('num', function () {
+      console.log('cbcbcb');
+    })
+
+    function change(num) {
+      mvvm.num = num;
+    }
+  </script>
+
+</body>
+
+</html>

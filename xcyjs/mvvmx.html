@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    #app {
+      padding-top: 100px;
+      font-size: 24px;
+      text-align: center;
+    }
+
+    input {
+      font-size: 24px;
+      text-align: center;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      width: 100px;
+      font-size: 24px;
+      height: 40px;
+      margin-top: 15px;
+      outline: none;
+      border: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <input type="text" v-model="num">
+    <div>
+      <span>num = </span>
+      <span>{{num}}</span>
+    </div>
+    <div>
+      <span>
+        num * 2 =
+      </span>
+      <span>
+        {{numTime2}}
+      </span>
+    </div>
+    <div>
+      <button onclick="numAdd(1)">num++</button>
+    </div>
+    <div>
+      <button onclick="numAdd(-1)">num--</button>
+    </div>
+  </div>
+</body>
+<script src="./xue.js"></script>
+<script>
+  let mvvm = new MVVM({
+    el: "#app",
+    data: {
+      num: 12,
+    },
+    computed: {
+      numTime2() {
+        return this.num * 2
+      }
+    }
+  })
+
+  function numAdd(num) {
+    mvvm.num = Number(mvvm.num) + num
+  }
+</script>
+
+</html>
